@@ -9,6 +9,8 @@ import lombok.Data;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Entity
 @Data
 public class Course {
@@ -18,12 +20,12 @@ public class Course {
     private Long id;
 
     private String catname;
-    private String imagepath;
+    private String imagePath;
     private String level;
     private String duration;
     private String title;
     private String star;
-    private double price;
+    private Long price;
     private String lessons;
     private String students;
 
@@ -48,5 +50,7 @@ public class Course {
     )
     @JsonManagedReference
     private List<Enrollment> enrollments;
+
+	
 
 }

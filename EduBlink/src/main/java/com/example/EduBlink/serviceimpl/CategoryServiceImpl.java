@@ -1,8 +1,9 @@
 package com.example.EduBlink.serviceimpl;
 
-import com.example.EduBlink.entity.Category;
 import com.example.EduBlink.Repository.CategoryRepository;
+import com.example.EduBlink.bean.CategoryDTO;
 import com.example.EduBlink.bean.JwtResponse;
+import com.example.EduBlink.entity.Category;
 import com.example.EduBlink.service.CategoryService;
 
 import java.util.List;
@@ -20,54 +21,74 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository repo;
 
     @Override
-    public ResponseEntity<?> addCategory(Category category) {
-        Category cat = new Category();
-        cat.setName(category.getName());
-        Category categ = repo.save(cat);
+    public ResponseEntity<?> addCategory(CategoryDTO dto) {
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new JwtResponse("Success", 201, null, "Category Added Successfully"));
+        Category cat = new Category();
+        cat.setName(dto.getName());
+        
+        Category saved = repo.save(cat);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Override
-    public ResponseEntity<?> updateCategory(Long id, Category category) {
+    public ResponseEntity<?> updateCategory(Long id, CategoryDTO dto) {
+
         Optional<Category> optional = repo.findById(id);
+
         if (optional.isPresent()) {
+
             Category existing = optional.get();
-            existing.setName(category.getName());
+            existing.setName(dto.getName());
+
             Category updated = repo.save(existing);
-            return ResponseEntity.ok(new JwtResponse("Success", 200, null, updated.toString()));
+
+            return ResponseEntity.ok(updated);
+
         } else {
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new JwtResponse("Failed", 404, null, "Category not found with id: " + id));
+                    .body("Category not found with id: " + id);
         }
     }
 
     @Override
     public ResponseEntity<?> deleteCategory(Long id) {
+
         if (repo.existsById(id)) {
+
             repo.deleteById(id);
-            return ResponseEntity.ok(new JwtResponse("Success", 200, null, "Category deleted successfully"));
+
+            return ResponseEntity.ok("Category deleted successfully");
+
         } else {
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new JwtResponse("Failed", 404, null, "Category not found with id: " + id));
+                    .body("Category not found with id: " + id);
         }
     }
 
     @Override
     public ResponseEntity<?> getAllCategories() {
+
         List<Category> list = repo.findAll();
+
         return ResponseEntity.ok(list);
     }
-    
+
     @Override
     public ResponseEntity<?> getById(Long id) {
+
         Optional<Category> optional = repo.findById(id);
+
         if (optional.isPresent()) {
-            return ResponseEntity.ok(new JwtResponse("Success", 200, null, optional.get().toString()));
+
+            return ResponseEntity.ok(optional.get());
+
         } else {
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new JwtResponse("Failed", 404, null, "Category not found with id: " + id));
+                    .body("Category not found with id: " + id);
         }
     }
 }

@@ -20,6 +20,6 @@ public class Instructor {
     private String profileImage;
     
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @JsonManagedReference
     private List<Course> courses;
 }

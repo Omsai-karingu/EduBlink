@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
-@CrossOrigin("*")
+@RequestMapping("/api/admin")
 public class UserController {
 	
 	@Autowired
@@ -26,14 +25,14 @@ public class UserController {
     }
 
     // ADMIN: GET ALL USERS
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(service.getAllUsers());
     }
 
     // ADMIN: UPDATE ROLE
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/role/{id}")
     public ResponseEntity<String> updateRole(
             @PathVariable Long id,

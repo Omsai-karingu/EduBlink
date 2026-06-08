@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User register(User user) {
         user.setPassword(encoder.encode(user.getPassword()));
-        user.setRole("ROLE_STUDENT");
+        user.setRole(User.Role.USER);
         return repo.save(user);
     }
 
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
         if (!encoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
-        return jwtUtil.generateToken(email);
+        return jwtUtil.generateToken(email, password);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateRole(Long userId, String role) {
         User user = repo.findById(userId).orElseThrow();
-        user.setRole(role);
+        user.setRole(User.Role.USER);
         repo.save(user);
     }
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
@@ -13,7 +15,7 @@ public class Enrollment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;   // ✅ ONLY Long
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
@@ -27,10 +29,7 @@ public class Enrollment {
     // PENDING | ACTIVE | CANCELLED
     private String status;
 
-    private LocalDateTime enrolledAt = LocalDateTime.now();
-
-	public void setStatus(String status2) {
-		// TODO Auto-generated method stub
-		
-	}
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime enrolledAt;
 }

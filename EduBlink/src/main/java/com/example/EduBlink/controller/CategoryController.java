@@ -1,37 +1,41 @@
-package com.example.EduBlink.controller;
+ package com.example.EduBlink.controller;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.EduBlink.bean.CategoryDTO;
 import com.example.EduBlink.entity.Category;
 import com.example.EduBlink.service.CategoryService;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("*")
+
 public class CategoryController {
 
     @Autowired
     private CategoryService service;
 
     // ✅ Only admin can add category
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/addCategory")
-    public ResponseEntity<?> addCategory(@RequestBody Category category) {
-        return service.addCategory(category);
+    public ResponseEntity<?> addCategory(@RequestBody CategoryDTO dto) {
+        return service.addCategory(dto);
     }
 
     // ✅ Only admin can update category using POST
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/updateCategory/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody Category category) {
-        return service.updateCategory(id, category);
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+        return service.updateCategory(id, dto);
     }
 
     // ✅ Only admin can delete category using POST
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/deleteCategory/{id}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
         return service.deleteCategory(id);
@@ -48,4 +52,7 @@ public class CategoryController {
     public ResponseEntity<?> getById(@PathVariable Long id) {
         return service.getById(id);
     }
+    
+   
+
 }

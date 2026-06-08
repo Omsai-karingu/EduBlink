@@ -3,75 +3,90 @@ package com.example.EduBlink.serviceimpl;
 import com.example.EduBlink.Repository.*;
 import com.example.EduBlink.entity.*;
 import com.example.EduBlink.service.PaymentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @Transactional
-public class PaymentServiceImpl implements PaymentService {
+public class PaymentServiceImpl
+        implements PaymentService {
 
     @Autowired
-    private PaymentRepository paymentRepository;
+    private PaymentRepository paymentRepo;
 
     @Autowired
-    private EnrollmentRepository enrollmentRepository;
+    private UserRepository userRepo;
 
     @Autowired
-    private UserRepository userRepository;
+    private CourseRepository courseRepo;
 
     @Autowired
-    private CourseRepository courseRepository;
+    private EnrollmentRepository enrollRepo;
 
     @Override
-    public Payment createPayment(Long userId, Long courseId, double amount) {
+    public Payment createPayment(
+            Long userId,
+            Long courseId,
+            double amount) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(userId)
+            .orElseThrow(() ->
+                new RuntimeException("User not found"));
 
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+        Course course = courseRepo.findById(courseId)
+            .orElseThrow(() ->
+                new RuntimeException("Course not found"));
 
-        Payment payment = new Payment();
-        payment.setOrderId("ORD-" + System.currentTimeMillis());
-        payment.setAmount(amount);
-        payment.setStatus("CREATED");
-        payment.setUser(user);
-        payment.setCourse(course);
+        Payment p = new Payment();
 
-        return paymentRepository.save(payment);
+        p.setOrderId("ORD-" + System.currentTimeMillis());
+        p.setAmount(amount);
+        p.setStatus("CREATED");
+        p.setUser(user);
+        p.setCourse(course);
+
+        return paymentRepo.save(p);
     }
 
     @Override
-    public Payment confirmPayment(String orderId, String paymentId, String status) {
+    public Payment confirmPayment(
+            String orderId,
+            String paymentId,
+            String status) {
 
-        Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        Payment p = paymentRepo
+            .findByOrderId(orderId)
+            .orElseThrow(() ->
+                new RuntimeException("Payment not found"));
 
-        payment.setPaymentId(paymentId);
-        payment.setStatus(status);
+        p.setPaymentId(paymentId);
+        p.setStatus(status);
 
-        if ("SUCCESS".equalsIgnoreCase(status)) {
+        if ("SUCCESS".equals(status)) {
 
-            Enrollment enrollment = enrollmentRepository
+            Enrollment e =
+                enrollRepo
                     .findByUserIdAndCourseId(
-                            payment.getUser().getId(),
-                            payment.getCourse().getId()   // int ✅
+                        p.getUser().getId(),
+                        p.getCourse().getId()
                     )
-                    .orElseThrow(() -> new RuntimeException("Enrollment not found"));
+                    .orElseGet(() -> {
 
-            enrollment.setStatus("ACTIVE");
-            enrollmentRepository.save(enrollment);
+                        Enrollment en =
+                            new Enrollment();
+
+                        en.setUser(p.getUser());
+                        en.setCourse(p.getCourse());
+                        en.setStatus("ACTIVE");
+
+                        return enrollRepo.save(en);
+                    });
+
+            e.setStatus("ACTIVE");
         }
 
-        return paymentRepository.save(payment);
-    }
-
-    @Override
-    public List<Payment> getPaymentsByUser(Long userId) {
-        return paymentRepository.findByUserId(userId);
+        return paymentRepo.save(p);
     }
 }
-

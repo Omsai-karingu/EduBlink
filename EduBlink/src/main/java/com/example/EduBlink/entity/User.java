@@ -1,6 +1,7 @@
 package com.example.EduBlink.entity;
 
 import jakarta.persistence.*;
+//import lombok.Builder;
 import lombok.Data;
 
 @Entity
@@ -8,26 +9,34 @@ import lombok.Data;
 @Data
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String name;
+	private String name;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+	@Column(unique = false, nullable = true)
+	private String email;
 
-    private String password;
+	private String password;
 
-    private String role;
+	// OTP LOGIN FIELDS (nullable)
+	@Column(nullable = false, unique = true)
 
-    // OTP LOGIN FIELDS (nullable)
-    @Column(nullable = true)
-    private String phone;
+	private String phone;
 
-    @Column(nullable = true)
-    private String otp;
+	@Column(nullable = true)
+	private String otp;
 
-    @Column(nullable = true)
-    private Long otpExpiryTime;
+	@Column(nullable = true)
+	private Long otpExpiry;
+
+	@Enumerated(EnumType.STRING)
+//    @Builder.Default
+	private Role role = Role.USER;
+
+	public enum Role {
+		ADMIN, USER
+	}
+
 }

@@ -2,13 +2,12 @@ package com.example.EduBlink.security;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.IOException;
 
@@ -21,77 +20,60 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(
             JwtService jwtService,
             UserDetailsServiceImpl userDetailsService) {
-
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-
-        return request.getServletPath()
-                .startsWith("/api/auth/");
-    }
-
-    @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain chain)
-
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
-        String authHeader =
-                request.getHeader("Authorization");
+    	String authHeader = request.getHeader("Authorization");
+    	System.out.println("Auth Header: " + authHeader);
 
-        if (authHeader == null ||
-            !authHeader.startsWith("Bearer ")) {
-
-            chain.doFilter(request, response);
+    	if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
             return;
         }
-
-        String token = authHeader.substring(7);
-        String email;
 
         try {
-            email = jwtService.extractEmail(token);
 
-        } catch (Exception e) {
+            String token = authHeader.substring(7).trim();
 
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid JWT Token");
-            return;
-        }
+            String username = jwtService.extractUsername(token);
+            System.out.println("Extracted Username: " + username);
+            
+            if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        if (email != null &&
-            SecurityContextHolder.getContext()
-                .getAuthentication() == null) {
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
 
-            UserDetails userDetails =
-                userDetailsService
-                    .loadUserByUsername(email);
+                if (jwtService.validateToken(token, userDetails)) {
+                	System.out.println("Authorities: " + userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-            if (jwtService
-                    .validateToken(token, userDetails)) {
-
-                UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request)
                     );
 
-                auth.setDetails(
-                    new WebAuthenticationDetailsSource()
-                        .buildDetails(request)
-                );
-
-                SecurityContextHolder.getContext()
-                        .setAuthentication(auth);
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authToken);
+                }
             }
+
+        } catch (Exception e) {
+            System.out.println("JWT Error: " + e.getMessage());
         }
 
-        chain.doFilter(request, response);
+        filterChain.doFilter(request, response);
     }
 }

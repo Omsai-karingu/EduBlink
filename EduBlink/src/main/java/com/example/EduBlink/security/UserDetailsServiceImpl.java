@@ -8,8 +8,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserDetailsServiceImpl
-        implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -19,19 +18,15 @@ public class UserDetailsServiceImpl
             throws UsernameNotFoundException {
 
         User user = userRepository
-            .findByEmail(email)
-            .orElseThrow(() ->
-                new UsernameNotFoundException(
-                    "User not found"
-                ));
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
-            .withUsername(user.getEmail())
-            .password(user.getPassword())
-
-            // TRIM avoids space issue
-            .roles(user.getRole().trim())
-
-            .build();
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                // Remove ROLE_ prefix because .roles() adds it automatically
+                .roles(user.getRole().name())
+                .build();
     }
 }

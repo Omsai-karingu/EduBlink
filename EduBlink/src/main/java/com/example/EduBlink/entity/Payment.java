@@ -1,33 +1,35 @@
 package com.example.EduBlink.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Data
-@Table(name = "payments")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;   // ✅ ONLY Long
+    private Long id;
 
     private String orderId;
+
     private String paymentId;
+
     private double amount;
 
-    // CREATED | SUCCESS | FAILED
     private String status;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(
-            name = "course_id",
-            referencedColumnName = "id",
-            columnDefinition = "BIGINT"
-        )
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Course course;
 }
